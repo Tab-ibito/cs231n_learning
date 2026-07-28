@@ -1,2 +1,5 @@
-./assignment1
-./agents
+/assignment1/
+/tmp/
+/.agents/
+/*.pdf
+/*.md

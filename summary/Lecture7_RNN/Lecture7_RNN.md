@@ -1,4 +1,4 @@
-# Lecture 8
+# Lecture 7
 
 ## Recurrent Neural Networks
 

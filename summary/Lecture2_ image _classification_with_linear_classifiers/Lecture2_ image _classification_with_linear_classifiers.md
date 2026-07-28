@@ -1,4 +1,4 @@
-# CS231n Learning
+# Lecture 2
 
 ## kNN k-Nearest Neighbors
 

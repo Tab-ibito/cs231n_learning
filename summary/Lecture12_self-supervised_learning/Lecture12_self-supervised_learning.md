@@ -156,3 +156,22 @@ batch 中其余 \(2N-2\) 个视图：负样本
 ![alt text](image-34.png)
 
 对 teacher 和 student 的矩阵迭代。
+
+工作原理：
+- Student和Teacher架构相同，Student蒸馏Teacher
+- 不区分正负样本
+- 梯度更新只涉及Student
+- Teacher的参数更新通过**Momentum方法**，比较平缓
+- 同一张图片切分为2个Global View + 若干个局部View
+  - 局部视图只提供给Student
+  - Global View 则Student和Teacher都提供
+- 通过Teacher的Centering 和 Sharpening**共同作用**，避免模型崩溃
+  - Centering 可以给Teacher网络添加修正项，同样用Momentum方法更新
+    - 相比Batch Norm它只需要一维操作即可
+    - 防止某个维度值占主导，但可能让权重向给出uniform输出发展
+  - Sharpening 负责调小Temperature
+    - 防止平缓情况出现权重向给出uniform输出发展的缺陷，但可能让某个维度值占主导
+
+**区别于传统CNN方法**：
+- 得到的特征**显式地包含场景布局，尤其是物体边界**。这些特征从ViT的最后一个block的self-attention模块中提取。
+- 得到的特征使用简单的kNN进行分类，而不是用微调和数据增强的情况下，就可以在ImageNet达到78.3%的准确率。

@@ -1,4 +1,4 @@
-# Lecture 13
+# Lecture 14
 
 ## Generative Adversarial Networks 生成对抗网络
 
@@ -123,6 +123,8 @@ for t in torch.linspace(1, 0, num_steps):
 
 通过条件约束来**引导**x落在某个范围内。
 
+比如通过文字语义的向量嵌入。
+
 #### Classifier-Free Guidance (CFG)
 
 ```Python
@@ -181,3 +183,40 @@ Classifier-Free 是因为我们不需要训练模型计算分类 `p(y|x)`，以�
 ![alt text](image-42.png)
 
 选择这些函数的**依据**是**数学形式**。
+
+#### Denoising Diffusion Probabilistic Models (DDPM)
+
+| 对比项 | DDPM | Rectified Flow |
+|---|---|---|
+| 中间状态 | \(x_t=\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon\) | \(x_t=(1-t)x+t z\) |
+| 路径 | 由噪声 schedule 决定的曲线路径 | 数据与噪声之间的直线路径 |
+| 时间 | 通常是离散的 \(t=0,\ldots,T-1\) | 连续的 \(t\in[0,1]\) |
+| 模型预测 | 噪声 \(\epsilon\) 或原图 \(x_0\) | 速度 \(v=z-x\) |
+| 训练损失 | \(\|\epsilon-\epsilon_\theta(x_t,t)\|^2\) 等 | \(\|z-x-v_\theta(x_t,t)\|^2\) |
+| 生成方式 | 逐步采样反向高斯分布，通常带随机性 | 从噪声出发，反向求解 ODE，通常是确定性的 |
+
+\(x_t=a(t)x_0+b(t)\epsilon\) 是**统一形式**。
+
+它们的**核心思想相同**：把数据逐渐变成噪声，再学习反向过程。
+
+DDPM **训练过程**：
+干净图片 x₀  
+- 随机选择 t  
+- 采样真实噪声 ε  
+- 一步生成 xₜ  
+- U-Net 预测 ε 或 x₀  
+- 计算 MSE  
+- 更新模型  
+
+**推理过程**：
+
+纯噪声 xT  
+- U-Net 预测 ε 或 x₀  
+- 估计干净图片 x̂₀  
+- 计算后验均值和方差
+  - \(q(x_{t-1}\mid x_t,x_0)=\mathcal N(\tilde\mu_t,\tilde\beta_t I)\)  
+- 采样 xₜ₋₁  
+- 重复直到 t=0  
+- 反归一化得到图片  
+
+原理与Rectified Flow有类似之处。
